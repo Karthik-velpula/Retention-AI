@@ -1,0 +1,21 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color: #132238;
+  background:
+    radial-gradient(circle at top left, rgba(255, 127, 81, 0.16), transparent 32%),
+    radial-gradient(circle at bottom right, rgba(117, 183, 152, 0.22), transparent 26%),
+    #edf6f9;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+#root {
+  min-height: 100vh;
+}
