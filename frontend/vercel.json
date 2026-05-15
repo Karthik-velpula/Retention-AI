@@ -1,0 +1,16 @@
+{
+  "rewrites": [
+    {
+      "source": "/Retention-AI/assets/:path*",
+      "destination": "/assets/:path*"
+    },
+    {
+      "source": "/Retention-AI/:path*",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/Retention-AI",
+      "destination": "/index.html"
+    }
+  ]
+}
