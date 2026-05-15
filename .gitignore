@@ -20,4 +20,3 @@ backend/google-drive-credentials.json
 exports/
 user-credentials-report.pdf
 user-security-grid-report.pdf
-frontend/build_studentwise_xlsx.mjs

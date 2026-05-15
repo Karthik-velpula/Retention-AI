@@ -1272,8 +1272,8 @@ export default function FilterPage() {
       ) : null}
 
       <section className="rounded-[2rem] bg-white p-5 shadow-soft sm:p-6">
-        <div className="mb-5 flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
-          <div className="flex-1">
+        <div className="mb-5 grid gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(280px,22rem)] xl:items-start">
+          <div className="min-w-0">
             <p className="text-xs uppercase tracking-[0.22em] text-tide">Active Filters</p>
             <div className="mt-3 flex flex-wrap justify-start gap-2">
               {activeFilters.length > 0 ? (
@@ -1293,27 +1293,30 @@ export default function FilterPage() {
             </div>
           </div>
 
-          <div className="w-full xl:max-w-md">
-            <div className="relative">
-              <Search className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-              <input
-                value={searchTerm}
-                onChange={(event) => setSearchTerm(event.target.value)}
-                onKeyDown={(event) => {
-                  if (event.key === "Enter") {
-                    handleSearchSubmit();
-                  }
-                }}
-                placeholder="Search students"
-                className="w-full rounded-2xl border border-slate-200 py-3 pl-11 pr-16 text-sm text-ink outline-none focus:border-tide sm:py-4 sm:pr-[10.5rem] sm:text-base"
-              />
+          <div className="min-w-0 w-full">
+            <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-stretch">
+              <div className="relative min-w-0 flex-1">
+                <Search className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                <input
+                  value={searchTerm}
+                  onChange={(event) => setSearchTerm(event.target.value)}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter") {
+                      handleSearchSubmit();
+                    }
+                  }}
+                  placeholder="Search students"
+                  className="w-full rounded-2xl border border-slate-200 py-3 pl-11 pr-4 text-sm text-ink outline-none focus:border-tide sm:py-4 sm:text-base"
+                />
+              </div>
               <button
                 type="button"
                 onClick={handleSearchSubmit}
                 aria-label="Search"
-                className="absolute right-2 top-1/2 inline-flex -translate-y-1/2 items-center justify-center rounded-2xl bg-tide px-3 py-3 text-base font-semibold text-white shadow-soft sm:px-5 sm:py-3.5"
+                className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-tide px-5 text-sm font-semibold text-white shadow-soft transition hover:bg-[#163f57] sm:h-auto sm:w-auto sm:min-w-[8rem]"
               >
-                <Search size={20} />
+                <Search size={18} />
+                Search
               </button>
             </div>
           </div>

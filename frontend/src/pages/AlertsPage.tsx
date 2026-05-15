@@ -337,7 +337,16 @@ export default function AlertsPage() {
 
       <section className="rounded-[2rem] bg-white shadow-soft">
         <div className="overflow-x-auto rounded-[2rem]">
-        <table className="min-w-[900px] text-left text-sm">
+        <table className="min-w-[980px] table-fixed text-left text-sm">
+          <colgroup>
+            <col className="w-[14%]" />
+            <col className="w-[25%]" />
+            <col className="w-[22%]" />
+            <col className="w-[10%]" />
+            <col className="w-[8%]" />
+            <col className="w-[15%]" />
+            <col className="w-[6%]" />
+          </colgroup>
           <thead className="bg-ink text-white">
             <tr>
               <th className="px-5 py-4 font-medium">Reg No</th>
@@ -372,15 +381,15 @@ export default function AlertsPage() {
                   </td>
                   <td className="px-5 py-4">{student.latest_risk_level ?? "Low"}</td>
                   <td className="px-5 py-4 text-slate-600">
-                    <div className="max-w-md space-y-2">
+                    <div className="max-w-[16rem] space-y-2 xl:max-w-[18rem]">
                       {alertContent.reasons.length > 0 ? (
                         alertContent.reasons.map((reason) => (
-                          <div key={reason} className="rounded-2xl bg-mist px-3 py-2">
+                          <div key={reason} className="break-words rounded-2xl bg-mist px-3 py-2 leading-relaxed">
                             {reason}
                           </div>
                         ))
                       ) : (
-                        <div className="rounded-2xl bg-mist px-3 py-2">No specific reason available.</div>
+                        <div className="break-words rounded-2xl bg-mist px-3 py-2 leading-relaxed">No specific reason available.</div>
                       )}
                     </div>
                   </td>
@@ -388,7 +397,7 @@ export default function AlertsPage() {
                     <button
                       onClick={() => handleSendAlert(student)}
                       disabled={busyStudentId === student.id}
-                      className="inline-flex items-center gap-2 rounded-2xl bg-coral px-4 py-2 font-semibold text-white disabled:cursor-not-allowed disabled:bg-slate-300"
+                      className="inline-flex w-full min-w-[6.5rem] items-center justify-center gap-2 rounded-2xl bg-coral px-4 py-2 font-semibold text-white disabled:cursor-not-allowed disabled:bg-slate-300"
                     >
                       <BellRing size={16} />
                       {busyStudentId === student.id ? "Sending..." : "Alert"}

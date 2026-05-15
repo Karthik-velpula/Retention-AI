@@ -249,18 +249,29 @@ export default function AdminPage() {
           <StatCard label="Resolved This Week" value={String(overview.resolvedThisWeek)} icon={<CheckCircle2 size={20} />} tone="bg-emerald-50" />
         </div>
 
-        <div className="relative mt-8 w-full max-w-md">
-          <Search className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-          <input
-            value={facultySearchTerm}
-            onChange={(event) => setFacultySearchTerm(event.target.value)}
-            placeholder="Search faculty by name"
-            className="w-full rounded-2xl border border-slate-200 py-3 pl-11 pr-4 text-sm text-ink outline-none focus:border-tide"
-          />
+        <div className="mt-8 flex w-full justify-end">
+          <div className="relative w-full max-w-md">
+            <Search className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+            <input
+              value={facultySearchTerm}
+              onChange={(event) => setFacultySearchTerm(event.target.value)}
+              placeholder="Search faculty by name"
+              className="w-full rounded-2xl border border-slate-200 py-3 pl-11 pr-4 text-sm text-ink outline-none focus:border-tide"
+            />
+          </div>
         </div>
 
         <div className="mt-8 overflow-x-auto rounded-[1.5rem] border border-slate-100">
-          <table className="min-w-[860px] text-left text-sm">
+          <table className="min-w-[980px] table-fixed text-left text-sm">
+            <colgroup>
+              <col className="w-[32%]" />
+              <col className="w-[10%]" />
+              <col className="w-[10%]" />
+              <col className="w-[12%]" />
+              <col className="w-[14%]" />
+              <col className="w-[14%]" />
+              <col className="w-[18%]" />
+            </colgroup>
             <thead className="bg-ink text-white">
               <tr>
                 <th className="px-5 py-4 font-medium">Faculty</th>
@@ -280,7 +291,7 @@ export default function AdminPage() {
                       <button
                         type="button"
                         onClick={() => setSelectedFacultyName(item.faculty_name)}
-                        className="text-left text-ink underline-offset-4 hover:text-[#26459d] hover:underline"
+                        className="block max-w-full truncate text-left text-ink underline-offset-4 hover:text-[#26459d] hover:underline"
                       >
                         {item.faculty_name}
                       </button>
@@ -344,7 +355,16 @@ export default function AdminPage() {
           ) : null}
 
           <div className="mt-8 overflow-x-auto rounded-[1.5rem] border border-slate-100">
-            <table className="min-w-[920px] text-left text-sm">
+            <table className="min-w-[980px] table-fixed text-left text-sm">
+              <colgroup>
+                <col className="w-[28%]" />
+                <col className="w-[16%]" />
+                <col className="w-[12%]" />
+                <col className="w-[14%]" />
+                <col className="w-[16%]" />
+                <col className="w-[14%]" />
+                <col className="w-[14%]" />
+              </colgroup>
               <thead className="bg-ink text-white">
                 <tr>
                   <th className="px-5 py-4 font-medium">Student</th>
@@ -368,23 +388,23 @@ export default function AdminPage() {
                     const record = selectedFacultyInterventions.get(student.id);
                     return (
                     <tr key={student.id} className="border-b border-slate-100 bg-white align-top">
-                      <td className="px-5 py-4">
+                      <td className="px-5 py-4 align-top">
                         <button
                           type="button"
                           onClick={() => scrollToInterventionActivity(student.id)}
-                          className="font-semibold text-ink underline-offset-4 hover:text-[#26459d] hover:underline"
+                          className="block max-w-full truncate text-left font-semibold text-ink underline-offset-4 hover:text-[#26459d] hover:underline"
                         >
                           {student.name}
                         </button>
-                        <div className="text-slate-500">{student.email}</div>
+                        <div className="mt-1 truncate text-sm text-slate-500">{student.email}</div>
                       </td>
-                      <td className="px-5 py-4">{student.registration_number}</td>
+                      <td className="px-5 py-4 align-top break-words">{student.registration_number}</td>
                       <td className="px-5 py-4">{student.attendance.toFixed(0)}%</td>
                       <td className="px-5 py-4">
                         <RiskBadge level={student.latest_risk_level ?? "High"} />
                       </td>
                       <td className="px-5 py-4 capitalize">{record?.intervention?.status === "in_progress" ? "in progress" : record?.intervention?.status ?? "pending"}</td>
-                      <td className="px-5 py-4">
+                      <td className="px-5 py-4 break-words">
                         {record?.intervention?.next_follow_up_date
                           ? new Date(record.intervention.next_follow_up_date).toLocaleDateString("en-IN", {
                               day: "2-digit",
@@ -393,7 +413,7 @@ export default function AdminPage() {
                             })
                           : "-"}
                       </td>
-                      <td className="px-5 py-4">{record?.intervention?.updated_by || "-"}</td>
+                      <td className="px-5 py-4 break-words">{record?.intervention?.updated_by || "-"}</td>
                     </tr>
                   )})
                 ) : (
