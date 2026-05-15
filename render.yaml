@@ -9,6 +9,8 @@ services:
     envVars:
       - key: APP_ENV
         value: production
+      - key: PYTHON_VERSION
+        value: 3.11.9
       - key: APP_BASE_PATH
         value: /Retention-AI
       - key: API_V1_STR
