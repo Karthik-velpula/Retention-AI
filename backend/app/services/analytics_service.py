@@ -2,7 +2,7 @@ from collections import defaultdict
 from datetime import datetime, timedelta
 
 from sqlalchemy import and_, case, exists, func, not_, or_
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session, selectinload
 
 from app.core.faculty_assignments import TEST_FACULTY_EMAIL
 from app.models.financial import Financial
@@ -214,7 +214,12 @@ def build_faculty_performance(db: Session) -> FacultyPerformanceResponse:
     )
     students = (
         db.query(Student)
-        .options(joinedload(Student.predictions), joinedload(Student.intervention))
+        .options(
+            selectinload(Student.lms_activity),
+            selectinload(Student.financial),
+            selectinload(Student.subject_attendance),
+            selectinload(Student.intervention),
+        )
         .order_by(Student.registration_number.asc())
         .all()
     )

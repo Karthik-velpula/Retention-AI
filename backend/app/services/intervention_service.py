@@ -4,7 +4,7 @@ import asyncio
 from datetime import date, datetime, timedelta
 from zoneinfo import ZoneInfo
 
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session, joinedload, selectinload
 
 from app.models.intervention import Intervention
 from app.models.intervention_history import InterventionHistory
@@ -70,7 +70,12 @@ def build_intervention_assist(
 ) -> InterventionAssistResponse:
     student = (
         _filtered_students_query(db, current_user)
-        .options(joinedload(Student.predictions), joinedload(Student.lms_activity), joinedload(Student.financial))
+        .options(
+            joinedload(Student.predictions),
+            joinedload(Student.lms_activity),
+            joinedload(Student.financial),
+            selectinload(Student.subject_attendance),
+        )
         .filter(Student.id == student_id)
         .first()
     )
@@ -138,7 +143,12 @@ def build_intervention_assist(
 def list_interventions(db: Session, current_user: User) -> list[InterventionStudentOverview]:
     students = (
         _filtered_students_query(db, current_user)
-        .options(joinedload(Student.intervention).joinedload(Intervention.history), joinedload(Student.predictions))
+        .options(
+            selectinload(Student.lms_activity),
+            selectinload(Student.financial),
+            selectinload(Student.subject_attendance),
+            selectinload(Student.intervention).selectinload(Intervention.history),
+        )
         .order_by(Student.registration_number.asc())
         .all()
     )
@@ -194,7 +204,13 @@ def _summarize_changes(previous: dict[str, object], payload: InterventionUpsert,
 def upsert_intervention(db: Session, current_user: User, student_id: int, payload: InterventionUpsert) -> InterventionSaveResponse:
     student = (
         _filtered_students_query(db, current_user)
-        .options(joinedload(Student.intervention), joinedload(Student.predictions))
+        .options(
+            joinedload(Student.intervention),
+            joinedload(Student.predictions),
+            joinedload(Student.lms_activity),
+            joinedload(Student.financial),
+            selectinload(Student.subject_attendance),
+        )
         .filter(Student.id == student_id)
         .first()
     )
