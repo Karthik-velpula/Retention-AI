@@ -1,4 +1,4 @@
-import { ReactNode, useMemo, useState } from "react";
+import { ReactNode, useEffect, useMemo, useState } from "react";
 import {
   BarChart3,
   BellRing,
@@ -18,6 +18,7 @@ import { NavLink } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import vignanLogo from "../assets/vignan-logo-deemed.svg";
 import VoiceAssistant from "../components/VoiceAssistant";
+import { fetchAnalytics, fetchFacultyPerformance, fetchStudentsPage } from "../api/endpoints";
 
 export default function AppShell({ children }: { children: ReactNode }) {
   const { logout, role, name, lastLoginAt } = useAuth();
@@ -52,6 +53,18 @@ export default function AppShell({ children }: { children: ReactNode }) {
       timeZone: "Asia/Kolkata",
     }).format(parsed);
   }, [lastLoginAt]);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      void fetchAnalytics();
+      void fetchStudentsPage({ page: 1, page_size: 25 });
+      if (role === "admin") {
+        void fetchFacultyPerformance();
+      }
+    }, 900);
+
+    return () => window.clearTimeout(timer);
+  }, [role]);
 
   return (
     <div className="min-h-screen">

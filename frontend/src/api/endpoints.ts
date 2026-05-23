@@ -21,6 +21,37 @@ import {
   RiskLevel,
 } from "../types";
 
+type CacheEntry<T> = {
+  expiresAt: number;
+  promise: Promise<T>;
+};
+
+const apiCache = new Map<string, CacheEntry<unknown>>();
+
+const cacheKey = (name: string, params?: unknown) => `${name}:${JSON.stringify(params ?? {})}`;
+
+const cachedRequest = <T>(key: string, ttlMs: number, request: () => Promise<T>) => {
+  const cached = apiCache.get(key) as CacheEntry<T> | undefined;
+  if (cached && cached.expiresAt > Date.now()) {
+    return cached.promise;
+  }
+
+  const promise = request().catch((error) => {
+    apiCache.delete(key);
+    throw error;
+  });
+  apiCache.set(key, { expiresAt: Date.now() + ttlMs, promise });
+  return promise;
+};
+
+const clearCachedRequests = (...prefixes: string[]) => {
+  Array.from(apiCache.keys()).forEach((key) => {
+    if (prefixes.some((prefix) => key.startsWith(prefix))) {
+      apiCache.delete(key);
+    }
+  });
+};
+
 export const login = async (username: string, password: string) => {
   const { data } = await client.post<LoginResponse>("/auth/login", { username, password });
   return data;
@@ -99,13 +130,17 @@ export const downloadSecurityGridReport = async () => {
 };
 
 export const fetchStudents = async () => {
-  const { data } = await client.get<StudentListItem[]>("/students");
-  return data;
+  return cachedRequest(cacheKey("students"), 120000, async () => {
+    const { data } = await client.get<StudentListItem[]>("/students");
+    return data;
+  });
 };
 
 export const fetchCounselors = async () => {
-  const { data } = await client.get<string[]>("/students/counselors");
-  return data;
+  return cachedRequest(cacheKey("counselors"), 300000, async () => {
+    const { data } = await client.get<string[]>("/students/counselors");
+    return data;
+  });
 };
 
 export const fetchStudentsPage = async (params: {
@@ -122,8 +157,10 @@ export const fetchStudentsPage = async (params: {
   min_cgpa?: number;
   max_cgpa?: number;
 }) => {
-  const { data } = await client.get<StudentListResponse>("/students/paged", { params });
-  return data;
+  return cachedRequest(cacheKey("students-page", params), 120000, async () => {
+    const { data } = await client.get<StudentListResponse>("/students/paged", { params });
+    return data;
+  });
 };
 
 export const fetchStudent = async (studentId: number) => {
@@ -132,13 +169,17 @@ export const fetchStudent = async (studentId: number) => {
 };
 
 export const fetchAnalytics = async () => {
-  const { data } = await client.get<AnalyticsData>("/analytics");
-  return data;
+  return cachedRequest(cacheKey("analytics"), 300000, async () => {
+    const { data } = await client.get<AnalyticsData>("/analytics");
+    return data;
+  });
 };
 
 export const fetchFacultyPerformance = async () => {
-  const { data } = await client.get<FacultyPerformanceData>("/analytics/faculty-performance");
-  return data;
+  return cachedRequest(cacheKey("faculty-performance"), 120000, async () => {
+    const { data } = await client.get<FacultyPerformanceData>("/analytics/faculty-performance");
+    return data;
+  });
 };
 
 export const askAssistant = async (query: string) => {
@@ -215,17 +256,22 @@ export const sendAlertEmail = async (payload: {
   recommendations: string[];
 }) => {
   const { data } = await client.post("/send-alert-email", payload);
+  clearCachedRequests("alert-history");
   return data;
 };
 
 export const fetchAlertHistory = async () => {
-  const { data } = await client.get<AlertHistoryItem[]>("/alerts/history");
-  return data;
+  return cachedRequest(cacheKey("alert-history"), 30000, async () => {
+    const { data } = await client.get<AlertHistoryItem[]>("/alerts/history");
+    return data;
+  });
 };
 
 export const fetchInterventions = async () => {
-  const { data } = await client.get<InterventionStudentOverview[]>("/interventions");
-  return data;
+  return cachedRequest(cacheKey("interventions"), 60000, async () => {
+    const { data } = await client.get<InterventionStudentOverview[]>("/interventions");
+    return data;
+  });
 };
 
 export const downloadInterventionHistoryPdf = async (counselorName: string, studentId?: number) => {
@@ -260,6 +306,7 @@ export const saveIntervention = async (
   }
 ) => {
   const { data } = await client.put<InterventionSaveResponse>(`/interventions/${studentId}`, payload);
+  clearCachedRequests("interventions", "faculty-performance", "students-page", "students");
   return data;
 };
 
