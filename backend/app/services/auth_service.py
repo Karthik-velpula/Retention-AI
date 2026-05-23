@@ -2,7 +2,7 @@ import json
 from datetime import datetime, timedelta
 import secrets
 
-from sqlalchemy import func, or_
+from sqlalchemy import or_
 
 from fastapi import HTTPException, status
 from jose import JWTError, jwt
@@ -44,19 +44,24 @@ FORGOT_PASSWORD_OTP_EMAIL = "231fa04509@gmail.com"
 
 
 def _find_user(identifier: str, db: Session) -> User | None:
-    normalized = identifier.strip().lower()
     raw = identifier.strip()
-    return (
+    normalized = raw.lower()
+    username_candidates = {raw, raw.upper(), normalized}
+
+    user = (
         db.query(User)
         .filter(
             or_(
-                func.lower(User.email) == normalized,
-                func.lower(User.username) == normalized,
-                User.name == raw,
+                User.email == normalized,
+                User.username.in_(username_candidates),
             )
         )
         .first()
     )
+    if user:
+        return user
+
+    return db.query(User).filter(User.name == raw).first()
 
 
 def _login_success_response(user: User, db: Session) -> TokenResponse:
