@@ -33,6 +33,7 @@ class Settings(BaseSettings):
     ALLOWED_HOSTS: str = "localhost,127.0.0.1"
     CORS_ORIGINS: str = ""
     FORCE_HTTPS: bool = False
+    RUN_STARTUP_DB_INIT: bool = True
     GOOGLE_DRIVE_CREDENTIALS_PATH: str = "google-drive-credentials.json"
     GOOGLE_DRIVE_REPORT_FOLDER_ID: str = ""
     MODEL_DIR: str = "backend/models"

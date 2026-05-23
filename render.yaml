@@ -21,6 +21,8 @@ services:
         value: backend/models
       - key: FORCE_HTTPS
         value: "True"
+      - key: RUN_STARTUP_DB_INIT
+        value: "False"
       - key: SECRET_KEY
         sync: false
       - key: DATABASE_URL

@@ -47,7 +47,8 @@ def create_application() -> FastAPI:
 
     @app.on_event("startup")
     async def startup_event() -> None:
-        init_db()
+        if settings.RUN_STARTUP_DB_INIT:
+            init_db()
 
     @app.get(f"{settings.APP_BASE_PATH}/health", tags=["health"])
     async def health_check() -> dict[str, str]:
