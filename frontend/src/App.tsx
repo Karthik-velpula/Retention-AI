@@ -20,6 +20,7 @@ function ProtectedRoutes() {
       <Routes>
         <Route path="/login" element={<Navigate to="/dashboard" replace />} />
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        <Route path="/ai-student" element={<Navigate to="/dashboard" replace />} />
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/filters" element={<FilterPage />} />
         <Route path="/interventions" element={role === "faculty" ? <InterventionsPage /> : <Navigate to="/dashboard" replace />} />
@@ -37,8 +38,10 @@ function ProtectedRoutes() {
 function PublicRoutes() {
   return (
     <Routes>
+      <Route path="/" element={<LoginPage />} />
+      <Route path="/ai-student" element={<Navigate to="/" replace />} />
       <Route path="/login" element={<LoginPage />} />
-      <Route path="*" element={<Navigate to="/login" replace />} />
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }

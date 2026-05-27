@@ -50,7 +50,7 @@ def create_application() -> FastAPI:
         if settings.APP_ENV.lower() != "production" and settings.RUN_STARTUP_DB_INIT:
             init_db()
 
-    @app.get(f"{settings.APP_BASE_PATH}/health", tags=["health"])
+    @app.get(f"{settings.API_PREFIX}/health", tags=["health"])
     async def health_check() -> dict[str, str]:
         return {"status": "ok"}
 

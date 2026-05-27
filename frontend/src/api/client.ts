@@ -1,7 +1,9 @@
 import axios from "axios";
 
+import { API_URL } from "../config";
+
 const client = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL ?? "http://127.0.0.1:8000/Retention-AI/api/v1"
+  baseURL: import.meta.env.VITE_API_BASE_URL ?? API_URL,
 });
 
 client.interceptors.request.use((config) => {

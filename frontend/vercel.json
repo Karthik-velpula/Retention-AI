@@ -1,15 +1,15 @@
 {
   "rewrites": [
     {
-      "source": "/Retention-AI/assets/:path*",
+      "source": "/aistudent/assets/:path*",
       "destination": "/assets/:path*"
     },
     {
-      "source": "/Retention-AI/:path*",
+      "source": "/aistudent/:path*",
       "destination": "/index.html"
     },
     {
-      "source": "/Retention-AI",
+      "source": "/aistudent",
       "destination": "/index.html"
     }
   ]

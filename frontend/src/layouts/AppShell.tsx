@@ -9,8 +9,8 @@ import {
   ClipboardCheck,
   Funnel,
   LogOut,
-  Menu,
   ShieldCheck,
+  Menu,
   X,
 } from "lucide-react";
 import { NavLink } from "react-router-dom";
@@ -26,7 +26,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
   const [desktopMenuOpen, setDesktopMenuOpen] = useState(true);
   const navItems = useMemo(
     () => [
-      { to: "/", label: "Dashboard", icon: <BarChart3 size={18} />, show: true },
+      { to: "/dashboard", label: "Dashboard", icon: <BarChart3 size={18} />, show: true },
       { to: "/students", label: "AI Predictions", icon: <BrainCircuit size={18} />, show: true },
       { to: "/filters", label: "Filters", icon: <Funnel size={18} />, show: true },
       { to: "/interventions", label: "Interventions", icon: <ClipboardCheck size={18} />, show: role === "faculty" },
