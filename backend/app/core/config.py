@@ -37,7 +37,7 @@ class Settings(BaseSettings):
     RUN_STARTUP_DB_INIT: bool = True
     RATE_LIMIT_REQUESTS: int = 120
     RATE_LIMIT_WINDOW_SECONDS: int = 60
-    AUTH_RATE_LIMIT_REQUESTS: int = 10
+    AUTH_RATE_LIMIT_REQUESTS: int = 40
     AUTH_RATE_LIMIT_WINDOW_SECONDS: int = 60
     GOOGLE_DRIVE_CREDENTIALS_PATH: str = "google-drive-credentials.json"
     GOOGLE_DRIVE_REPORT_FOLDER_ID: str = ""
