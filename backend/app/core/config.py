@@ -13,6 +13,7 @@ class Settings(BaseSettings):
     APP_BASE_PATH: str = "/aistudent"
     SECRET_KEY: str = "change-me"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 120
+    REFRESH_TOKEN_EXPIRE_DAYS: int = 7
     DATABASE_URL: str | None = None
     MYSQL_USER: str = "root"
     MYSQL_PASSWORD: str = "password"
@@ -34,6 +35,10 @@ class Settings(BaseSettings):
     CORS_ORIGINS: str = ""
     FORCE_HTTPS: bool = False
     RUN_STARTUP_DB_INIT: bool = True
+    RATE_LIMIT_REQUESTS: int = 120
+    RATE_LIMIT_WINDOW_SECONDS: int = 60
+    AUTH_RATE_LIMIT_REQUESTS: int = 10
+    AUTH_RATE_LIMIT_WINDOW_SECONDS: int = 60
     GOOGLE_DRIVE_CREDENTIALS_PATH: str = "google-drive-credentials.json"
     GOOGLE_DRIVE_REPORT_FOLDER_ID: str = ""
     MODEL_DIR: str = "backend/models"

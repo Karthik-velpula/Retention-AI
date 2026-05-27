@@ -80,8 +80,20 @@ def _create_token(subject: str | Any, expires_delta: timedelta | None = None, ex
     return jwt.encode(to_encode, settings.SECRET_KEY, algorithm=ALGORITHM)
 
 
-def create_access_token(subject: str | Any, expires_delta: timedelta | None = None) -> str:
-    return _create_token(subject, expires_delta=expires_delta, extra_claims={"token_type": "access"})
+def create_access_token(subject: str | Any, token_version: int, expires_delta: timedelta | None = None) -> str:
+    return _create_token(
+        subject,
+        expires_delta=expires_delta,
+        extra_claims={"token_type": "access", "token_version": token_version},
+    )
+
+
+def create_refresh_token(subject: str | Any, token_version: int, expires_delta: timedelta | None = None) -> str:
+    return _create_token(
+        subject,
+        expires_delta=expires_delta,
+        extra_claims={"token_type": "refresh", "token_version": token_version},
+    )
 
 
 def create_grid_challenge_token(subject: str | Any, positions: list[str], expires_delta: timedelta | None = None) -> str:

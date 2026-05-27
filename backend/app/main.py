@@ -5,6 +5,7 @@ from fastapi.middleware.trustedhost import TrustedHostMiddleware
 
 from app.api.router import api_router
 from app.core.config import settings
+from app.core.rate_limit import RateLimitMiddleware
 from app.core.security_headers import SecurityHeadersMiddleware
 from app.utils.init_db import init_db
 
@@ -33,6 +34,14 @@ def create_application() -> FastAPI:
     )
 
     app.add_middleware(SecurityHeadersMiddleware)
+    app.add_middleware(
+        RateLimitMiddleware,
+        limit=settings.RATE_LIMIT_REQUESTS,
+        window_seconds=settings.RATE_LIMIT_WINDOW_SECONDS,
+        auth_limit=settings.AUTH_RATE_LIMIT_REQUESTS,
+        auth_window_seconds=settings.AUTH_RATE_LIMIT_WINDOW_SECONDS,
+        auth_path_prefix=f"{settings.API_PREFIX}/auth",
+    )
     app.add_middleware(TrustedHostMiddleware, allowed_hosts=settings.ALLOWED_HOSTS_LIST or ["*"])
     if settings.FORCE_HTTPS:
         app.add_middleware(HTTPSRedirectMiddleware)

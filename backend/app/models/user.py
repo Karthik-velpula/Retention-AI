@@ -15,5 +15,6 @@ class User(Base):
     role = Column(String(20), nullable=False, default="faculty")
     security_grid = Column(String(1000), nullable=False, default="{}")
     last_login_at = Column(DateTime, nullable=True)
+    token_version = Column(Integer, nullable=False, default=0)
 
     password_reset_otps = relationship("PasswordResetOTP", back_populates="user", cascade="all, delete-orphan")

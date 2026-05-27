@@ -57,6 +57,16 @@ export const login = async (username: string, password: string) => {
   return data;
 };
 
+export const refreshLogin = async (refresh_token: string) => {
+  const { data } = await client.post<LoginResponse>("/auth/refresh", { refresh_token });
+  return data;
+};
+
+export const logoutSession = async () => {
+  const { data } = await client.post<{ detail: string }>("/auth/logout");
+  return data;
+};
+
 export const fetchSecurityGridPreview = async (username: string) => {
   const { data } = await client.get<SecurityGridPreviewResponse>("/auth/security-grid-preview", { params: { username } });
   return data;

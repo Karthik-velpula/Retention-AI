@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 
-from app.api.deps import require_admin
+from app.api.deps import get_current_user, require_admin
 from app.db.session import get_db
 from app.models.user import User
 from app.schemas.auth import (
@@ -13,6 +13,7 @@ from app.schemas.auth import (
     MessageResponse,
     PasswordResetConfirm,
     PasswordResetRequest,
+    RefreshTokenRequest,
     SecurityGridResetConfirm,
     SecurityGridResetConfirmResponse,
     SecurityGridResetRequest,
@@ -27,6 +28,8 @@ from app.services.auth_service import (
     get_security_grid_report_for_download,
     get_security_grid_preview,
     login_user,
+    logout_user,
+    refresh_login,
     request_password_reset,
     request_security_grid_reset,
     verify_grid_login,
@@ -39,6 +42,16 @@ router = APIRouter()
 @router.post("/login", response_model=TokenResponse)
 def login(payload: LoginRequest, db: Session = Depends(get_db)) -> TokenResponse:
     return login_user(payload, db)
+
+
+@router.post("/refresh", response_model=TokenResponse)
+def refresh(payload: RefreshTokenRequest, db: Session = Depends(get_db)) -> TokenResponse:
+    return refresh_login(payload, db)
+
+
+@router.post("/logout", response_model=MessageResponse)
+def logout(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)) -> MessageResponse:
+    return logout_user(current_user, db)
 
 
 @router.get("/login/grid-challenge", response_model=GridChallengeResponse)

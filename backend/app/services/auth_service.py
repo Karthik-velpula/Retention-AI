@@ -1,5 +1,5 @@
 import json
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import secrets
 
 from sqlalchemy import or_
@@ -12,6 +12,7 @@ from app.core.config import settings
 from app.core.faculty_assignments import TEST_FACULTY_EMAIL
 from app.core.security import (
     create_access_token,
+    create_refresh_token,
     create_grid_challenge_token,
     create_one_time_token,
     generate_security_grid,
@@ -28,6 +29,7 @@ from app.schemas.auth import (
     MessageResponse,
     PasswordResetConfirm,
     PasswordResetRequest,
+    RefreshTokenRequest,
     SecurityGridResetConfirm,
     SecurityGridResetConfirmResponse,
     SecurityGridResetRequest,
@@ -68,9 +70,22 @@ def _login_success_response(user: User, db: Session) -> TokenResponse:
     previous_login_at = user.last_login_at
     user.last_login_at = datetime.utcnow()
     db.commit()
-    access_token = create_access_token(user.id, timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES))
+    access_expires_delta = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    refresh_expires_delta = timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS)
+    access_token = create_access_token(user.id, user.token_version, access_expires_delta)
+    refresh_token = create_refresh_token(user.id, user.token_version, refresh_expires_delta)
+    access_token_expires_at = datetime.now(timezone.utc) + access_expires_delta
+    refresh_token_expires_at = datetime.now(timezone.utc) + refresh_expires_delta
     display_name = "" if user.email == TEST_FACULTY_EMAIL else user.name
-    return TokenResponse(access_token=access_token, role=user.role, name=display_name, last_login_at=previous_login_at)
+    return TokenResponse(
+        access_token=access_token,
+        refresh_token=refresh_token,
+        role=user.role,
+        name=display_name,
+        last_login_at=previous_login_at,
+        access_token_expires_at=access_token_expires_at,
+        refresh_token_expires_at=refresh_token_expires_at,
+    )
 
 
 def _build_grid_challenge(user: User) -> GridChallengeResponse:
@@ -93,6 +108,35 @@ def login_user(payload: LoginRequest, db: Session) -> TokenResponse:
     if not verify_password(payload.password, user.password):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Password is wrong")
     return _login_success_response(user, db)
+
+
+def refresh_login(payload: RefreshTokenRequest, db: Session) -> TokenResponse:
+    credentials_exception = HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid refresh token")
+    try:
+        token_payload = jwt.decode(payload.refresh_token, settings.SECRET_KEY, algorithms=["HS256"])
+        refresh_data = TokenPayload(
+            sub=token_payload.get("sub"),
+            token_type=token_payload.get("token_type"),
+            token_version=token_payload.get("token_version"),
+        )
+    except JWTError as exc:
+        raise credentials_exception from exc
+
+    if refresh_data.sub is None or refresh_data.token_type != "refresh":
+        raise credentials_exception
+
+    user = db.query(User).filter(User.id == int(refresh_data.sub)).first()
+    if not user or refresh_data.token_version != user.token_version:
+        raise credentials_exception
+
+    return _login_success_response(user, db)
+
+
+def logout_user(current_user: User, db: Session) -> MessageResponse:
+    current_user.token_version = (current_user.token_version or 0) + 1
+    db.add(current_user)
+    db.commit()
+    return MessageResponse(detail="Logged out successfully.")
 
 
 def get_security_grid_preview(username: str, db: Session) -> SecurityGridPreviewResponse:
@@ -187,6 +231,7 @@ def confirm_password_reset(payload: PasswordResetConfirm, db: Session) -> Messag
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid or expired OTP")
 
     user.password = get_password_hash(payload.new_password)
+    user.token_version = (user.token_version or 0) + 1
     otp.used_at = datetime.utcnow()
     db.commit()
     return MessageResponse(detail="Password reset successful. You can now log in with the new password.")
@@ -237,6 +282,7 @@ def confirm_security_grid_reset(payload: SecurityGridResetConfirm, db: Session) 
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid or expired OTP")
 
     user.security_grid = json.dumps(generate_security_grid(f"{user.email}:{secrets.token_hex(8)}"))
+    user.token_version = (user.token_version or 0) + 1
     otp.used_at = datetime.utcnow()
     db.commit()
     download_token = create_one_time_token(user.id, GRID_DOWNLOAD_PURPOSE, timedelta(minutes=10))

@@ -20,7 +20,11 @@ def get_current_user(db: Session = Depends(get_db), token: str = Depends(oauth2_
     )
     try:
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[ALGORITHM])
-        token_data = TokenPayload(sub=payload.get("sub"), token_type=payload.get("token_type"))
+        token_data = TokenPayload(
+            sub=payload.get("sub"),
+            token_type=payload.get("token_type"),
+            token_version=payload.get("token_version"),
+        )
     except JWTError as exc:
         raise credentials_exception from exc
 
@@ -28,7 +32,7 @@ def get_current_user(db: Session = Depends(get_db), token: str = Depends(oauth2_
         raise credentials_exception
 
     user = db.query(User).filter(User.id == int(token_data.sub)).first()
-    if not user:
+    if not user or token_data.token_version != user.token_version:
         raise credentials_exception
     return user
 

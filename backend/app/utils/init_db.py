@@ -66,6 +66,8 @@ def init_db() -> None:
             connection.execute(text("ALTER TABLE users ADD COLUMN security_grid VARCHAR(1000) NOT NULL DEFAULT '{}'"))
         if "last_login_at" not in user_columns:
             connection.execute(text("ALTER TABLE users ADD COLUMN last_login_at DATETIME NULL"))
+        if "token_version" not in user_columns:
+            connection.execute(text("ALTER TABLE users ADD COLUMN token_version INTEGER NOT NULL DEFAULT 0"))
     user_indexes = {index["name"]: index for index in inspector.get_indexes("users")}
     with engine.begin() as connection:
         if "ix_users_username" not in user_indexes:

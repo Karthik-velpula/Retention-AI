@@ -3,10 +3,13 @@ export type RiskLevel = "Safe" | "Low" | "Medium" | "High";
 
 export interface LoginResponse {
   access_token: string;
+  refresh_token: string;
   token_type: string;
   role: UserRole;
   name: string;
   last_login_at?: string | null;
+  access_token_expires_at: string;
+  refresh_token_expires_at: string;
 }
 
 export interface GridChallengeResponse {
