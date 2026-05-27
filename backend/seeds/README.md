@@ -4,6 +4,8 @@ This folder stores SQL data-only seed exports from the current `student_retentio
 
 Files:
 
+- `schema.sql`
+  - database schema for the current `student_retention` MySQL database
 - `users_seed.sql`
   - seeded admin and faculty login rows from the `users` table
 - `project_seed.sql`
@@ -18,12 +20,13 @@ Files:
     - `alert_history`
     - `password_reset_otps`
 
-These dumps use `--no-create-info`, so they insert data only.
-Run the app schema/init first, then import these files.
+`schema.sql` contains structure.
+`users_seed.sql` and `project_seed.sql` are data-only dumps.
 
 Example import:
 
 ```bash
+mysql -h 127.0.0.1 -P 3306 -u root -p student_retention < backend/seeds/schema.sql
 mysql -h 127.0.0.1 -P 3306 -u root -p student_retention < backend/seeds/users_seed.sql
 mysql -h 127.0.0.1 -P 3306 -u root -p student_retention < backend/seeds/project_seed.sql
 ```
@@ -31,6 +34,7 @@ mysql -h 127.0.0.1 -P 3306 -u root -p student_retention < backend/seeds/project_
 Recommended order:
 
 1. create database
-2. run backend init/schema setup
+2. import `schema.sql`
 3. import `users_seed.sql`
 4. import `project_seed.sql`
+5. run backend if you want app-level init checks/fixes
