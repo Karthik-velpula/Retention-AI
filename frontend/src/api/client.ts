@@ -8,20 +8,9 @@ const client = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL ?? API_URL,
 });
 
-const API_PREFIX = "/ren";
-const AUTH_PREFIX = "/ren/auth";
-const REFRESH_PATH = "/ren/auth/refresh";
+const AUTH_PREFIX = "/auth";
+const REFRESH_PATH = "/auth/refresh";
 let refreshPromise: Promise<string | null> | null = null;
-
-const withApiPrefix = (url?: string) => {
-  if (!url || /^https?:\/\//i.test(url)) {
-    return url;
-  }
-  if (url === API_PREFIX || url.startsWith(`${API_PREFIX}/`)) {
-    return url;
-  }
-  return url.startsWith("/") ? `${API_PREFIX}${url}` : `${API_PREFIX}/${url}`;
-};
 
 const shouldSkipRefresh = (url?: string) => {
   if (!url) {
@@ -92,7 +81,6 @@ const refreshAccessToken = async () => {
 };
 
 client.interceptors.request.use(async (config) => {
-  config.url = withApiPrefix(config.url);
   if (!shouldSkipRefresh(config.url)) {
     const currentToken = localStorage.getItem("retention-token");
     if (isTokenNearExpiry(currentToken)) {
