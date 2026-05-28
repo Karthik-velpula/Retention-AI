@@ -1,3 +1,5 @@
+from urllib.parse import urlparse
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.httpsredirect import HTTPSRedirectMiddleware
@@ -8,6 +10,15 @@ from app.core.config import settings
 from app.core.rate_limit import RateLimitMiddleware
 from app.core.security_headers import SecurityHeadersMiddleware
 from app.utils.init_db import init_db
+
+
+def _api_prefixes() -> list[str]:
+    prefixes = [settings.API_PREFIX]
+    for prefix in (settings.API_V1_STR, urlparse(settings.PUBLIC_API_URL).path):
+        clean_prefix = prefix.rstrip("/")
+        if clean_prefix and clean_prefix not in prefixes:
+            prefixes.append(clean_prefix)
+    return prefixes
 
 
 def create_application() -> FastAPI:
@@ -63,7 +74,10 @@ def create_application() -> FastAPI:
     async def health_check() -> dict[str, str]:
         return {"status": "ok"}
 
-    app.include_router(api_router, prefix=settings.API_PREFIX)
+    for prefix in _api_prefixes():
+        if prefix != settings.API_PREFIX:
+            app.add_api_route(f"{prefix}/health", health_check, methods=["GET"], tags=["health"], include_in_schema=False)
+        app.include_router(api_router, prefix=prefix, include_in_schema=prefix == settings.API_PREFIX)
     return app
 
 

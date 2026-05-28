@@ -53,7 +53,7 @@ const clearCachedRequests = (...prefixes: string[]) => {
 };
 
 export const login = async (username: string, password: string) => {
-  const { data } = await client.post<LoginResponse>("/auth/login", { username, password });
+  const { data } = await client.post<LoginResponse>("/ren/auth/login", { username, password });
   return data;
 };
 
