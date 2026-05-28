@@ -8,7 +8,7 @@ const client = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL ?? API_URL,
 });
 
-const REFRESH_PATH = "/auth/refresh";
+const REFRESH_PATH = "/ren/auth/refresh";
 let refreshPromise: Promise<string | null> | null = null;
 
 const clearStoredSession = () => {

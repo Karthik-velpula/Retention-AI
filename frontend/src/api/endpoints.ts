@@ -52,28 +52,30 @@ const clearCachedRequests = (...prefixes: string[]) => {
   });
 };
 
+const apiPath = (path: `/${string}`) => `/ren${path}`;
+
 export const login = async (username: string, password: string) => {
-  const { data } = await client.post<LoginResponse>("/ren/auth/login", { username, password });
+  const { data } = await client.post<LoginResponse>(apiPath("/auth/login"), { username, password });
   return data;
 };
 
 export const refreshLogin = async (refresh_token: string) => {
-  const { data } = await client.post<LoginResponse>("/auth/refresh", { refresh_token });
+  const { data } = await client.post<LoginResponse>(apiPath("/auth/refresh"), { refresh_token });
   return data;
 };
 
 export const logoutSession = async () => {
-  const { data } = await client.post<{ detail: string }>("/auth/logout");
+  const { data } = await client.post<{ detail: string }>(apiPath("/auth/logout"));
   return data;
 };
 
 export const fetchSecurityGridPreview = async (username: string) => {
-  const { data } = await client.get<SecurityGridPreviewResponse>("/auth/security-grid-preview", { params: { username } });
+  const { data } = await client.get<SecurityGridPreviewResponse>(apiPath("/auth/security-grid-preview"), { params: { username } });
   return data;
 };
 
 export const fetchGridChallenge = async (username: string) => {
-  const { data } = await client.get<GridChallengeResponse>("/auth/login/grid-challenge", { params: { username } });
+  const { data } = await client.get<GridChallengeResponse>(apiPath("/auth/login/grid-challenge"), { params: { username } });
   return data;
 };
 
@@ -83,7 +85,7 @@ export const completeGridLogin = async (
   challenge_token: string,
   answers: Record<string, string>
 ) => {
-  const { data } = await client.post<LoginResponse>("/auth/login/complete", {
+  const { data } = await client.post<LoginResponse>(apiPath("/auth/login/complete"), {
     username,
     password,
     challenge_token,
@@ -93,27 +95,27 @@ export const completeGridLogin = async (
 };
 
 export const requestPasswordReset = async (username: string) => {
-  const { data } = await client.post<{ detail: string }>("/auth/forgot-password/request", { username });
+  const { data } = await client.post<{ detail: string }>(apiPath("/auth/forgot-password/request"), { username });
   return data;
 };
 
 export const confirmPasswordReset = async (username: string, otp: string, new_password: string) => {
-  const { data } = await client.post<{ detail: string }>("/auth/forgot-password/confirm", { username, otp, new_password });
+  const { data } = await client.post<{ detail: string }>(apiPath("/auth/forgot-password/confirm"), { username, otp, new_password });
   return data;
 };
 
 export const requestSecurityGridReset = async (username: string) => {
-  const { data } = await client.post<{ detail: string }>("/auth/security-grid-reset/request", { username });
+  const { data } = await client.post<{ detail: string }>(apiPath("/auth/security-grid-reset/request"), { username });
   return data;
 };
 
 export const confirmSecurityGridReset = async (username: string, otp: string) => {
-  const { data } = await client.post<SecurityGridResetConfirmResponse>("/auth/security-grid-reset/confirm", { username, otp });
+  const { data } = await client.post<SecurityGridResetConfirmResponse>(apiPath("/auth/security-grid-reset/confirm"), { username, otp });
   return data;
 };
 
 export const downloadResetSecurityGrid = async (downloadToken: string) => {
-  const response = await client.get("/auth/security-grid-reset/download", {
+  const response = await client.get(apiPath("/auth/security-grid-reset/download"), {
     params: { token: downloadToken },
     responseType: "blob",
   });
@@ -128,7 +130,7 @@ export const downloadResetSecurityGrid = async (downloadToken: string) => {
 };
 
 export const downloadSecurityGridReport = async () => {
-  const response = await client.get("/auth/security-grid-report", { responseType: "blob" });
+  const response = await client.get(apiPath("/auth/security-grid-report"), { responseType: "blob" });
   const url = window.URL.createObjectURL(new Blob([response.data], { type: "application/pdf" }));
   const link = document.createElement("a");
   link.href = url;
@@ -141,14 +143,14 @@ export const downloadSecurityGridReport = async () => {
 
 export const fetchStudents = async () => {
   return cachedRequest(cacheKey("students"), 120000, async () => {
-    const { data } = await client.get<StudentListItem[]>("/students");
+    const { data } = await client.get<StudentListItem[]>(apiPath("/students"));
     return data;
   });
 };
 
 export const fetchCounselors = async () => {
   return cachedRequest(cacheKey("counselors"), 300000, async () => {
-    const { data } = await client.get<string[]>("/students/counselors");
+    const { data } = await client.get<string[]>(apiPath("/students/counselors"));
     return data;
   });
 };
@@ -168,37 +170,37 @@ export const fetchStudentsPage = async (params: {
   max_cgpa?: number;
 }) => {
   return cachedRequest(cacheKey("students-page", params), 120000, async () => {
-    const { data } = await client.get<StudentListResponse>("/students/paged", { params });
+    const { data } = await client.get<StudentListResponse>(apiPath("/students/paged"), { params });
     return data;
   });
 };
 
 export const fetchStudent = async (studentId: number) => {
-  const { data } = await client.get<StudentDetail>(`/students/${studentId}`);
+  const { data } = await client.get<StudentDetail>(apiPath(`/students/${studentId}`));
   return data;
 };
 
 export const fetchAnalytics = async () => {
   return cachedRequest(cacheKey("analytics"), 300000, async () => {
-    const { data } = await client.get<AnalyticsData>("/analytics");
+    const { data } = await client.get<AnalyticsData>(apiPath("/analytics"));
     return data;
   });
 };
 
 export const fetchFacultyPerformance = async () => {
   return cachedRequest(cacheKey("faculty-performance"), 120000, async () => {
-    const { data } = await client.get<FacultyPerformanceData>("/analytics/faculty-performance");
+    const { data } = await client.get<FacultyPerformanceData>(apiPath("/analytics/faculty-performance"));
     return data;
   });
 };
 
 export const askAssistant = async (query: string) => {
-  const { data } = await client.post<AssistantQueryResponse>("/assistant/query", { query });
+  const { data } = await client.post<AssistantQueryResponse>(apiPath("/assistant/query"), { query });
   return data;
 };
 
 export const predictRisk = async (studentId: number, payload: StudentDetail) => {
-  const { data } = await client.post<PredictionResult>("/predict-risk", {
+  const { data } = await client.post<PredictionResult>(apiPath("/predict-risk"), {
     student_id: studentId,
     gpa: payload.gpa,
     attendance: payload.attendance,
@@ -214,17 +216,17 @@ export const predictRisk = async (studentId: number, payload: StudentDetail) => 
 };
 
 export const fetchRecommendations = async (studentId: number) => {
-  const { data } = await client.get<RecommendationsData>(`/recommendations/${studentId}`);
+  const { data } = await client.get<RecommendationsData>(apiPath(`/recommendations/${studentId}`));
   return data;
 };
 
 export const fetchPredictionHistory = async (studentId: number) => {
-  const { data } = await client.get<PredictionHistoryItem[]>(`/students/${studentId}/predictions`);
+  const { data } = await client.get<PredictionHistoryItem[]>(apiPath(`/students/${studentId}/predictions`));
   return data;
 };
 
 export const downloadParentReport = async (studentId: number, studentName: string) => {
-  const response = await client.get(`/students/${studentId}/parent-report`, {
+  const response = await client.get(apiPath(`/students/${studentId}/parent-report`), {
     responseType: "blob",
   });
   const url = window.URL.createObjectURL(new Blob([response.data], { type: "application/pdf" }));
@@ -239,21 +241,21 @@ export const downloadParentReport = async (studentId: number, studentName: strin
 };
 
 export const createParentReportLink = async (studentId: number) => {
-  const { data } = await client.get<{ report_url: string }>(`/students/${studentId}/parent-report-link`);
+  const { data } = await client.get<{ report_url: string }>(apiPath(`/students/${studentId}/parent-report-link`));
   return data.report_url;
 };
 
 export const uploadDataset = async (file: File) => {
   const formData = new FormData();
   formData.append("file", file);
-  const { data } = await client.post("/students/upload-csv", formData, {
+  const { data } = await client.post(apiPath("/students/upload-csv"), formData, {
     headers: { "Content-Type": "multipart/form-data" }
   });
   return data;
 };
 
 export const trainModel = async () => {
-  const { data } = await client.post("/train-model");
+  const { data } = await client.post(apiPath("/train-model"));
   return data;
 };
 
@@ -265,27 +267,27 @@ export const sendAlertEmail = async (payload: {
   explanation: string;
   recommendations: string[];
 }) => {
-  const { data } = await client.post("/send-alert-email", payload);
+  const { data } = await client.post(apiPath("/send-alert-email"), payload);
   clearCachedRequests("alert-history");
   return data;
 };
 
 export const fetchAlertHistory = async () => {
   return cachedRequest(cacheKey("alert-history"), 30000, async () => {
-    const { data } = await client.get<AlertHistoryItem[]>("/alerts/history");
+    const { data } = await client.get<AlertHistoryItem[]>(apiPath("/alerts/history"));
     return data;
   });
 };
 
 export const fetchInterventions = async () => {
   return cachedRequest(cacheKey("interventions"), 60000, async () => {
-    const { data } = await client.get<InterventionStudentOverview[]>("/interventions");
+    const { data } = await client.get<InterventionStudentOverview[]>(apiPath("/interventions"));
     return data;
   });
 };
 
 export const downloadInterventionHistoryPdf = async (counselorName: string, studentId?: number) => {
-  const response = await client.get("/interventions/report/pdf", {
+  const response = await client.get(apiPath("/interventions/report/pdf"), {
     params: {
       counselor_name: counselorName,
       ...(studentId ? { student_id: studentId } : {}),
@@ -315,7 +317,7 @@ export const saveIntervention = async (
     notes: string;
   }
 ) => {
-  const { data } = await client.put<InterventionSaveResponse>(`/interventions/${studentId}`, payload);
+  const { data } = await client.put<InterventionSaveResponse>(apiPath(`/interventions/${studentId}`), payload);
   clearCachedRequests("interventions", "faculty-performance", "students-page", "students");
   return data;
 };
@@ -330,6 +332,6 @@ export const fetchInterventionAssist = async (
     status: "pending" | "in_progress" | "resolved";
   }
 ) => {
-  const { data } = await client.post<InterventionAssistResponse>(`/interventions/${studentId}/ai-assist`, payload);
+  const { data } = await client.post<InterventionAssistResponse>(apiPath(`/interventions/${studentId}/ai-assist`), payload);
   return data;
 };
