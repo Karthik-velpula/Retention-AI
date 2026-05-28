@@ -9,6 +9,7 @@ const client = axios.create({
 });
 
 const API_PREFIX = "/ren";
+const AUTH_PREFIX = "/ren/auth";
 const REFRESH_PATH = "/ren/auth/refresh";
 let refreshPromise: Promise<string | null> | null = null;
 
@@ -20,6 +21,19 @@ const withApiPrefix = (url?: string) => {
     return url;
   }
   return url.startsWith("/") ? `${API_PREFIX}${url}` : `${API_PREFIX}/${url}`;
+};
+
+const shouldSkipRefresh = (url?: string) => {
+  if (!url) {
+    return false;
+  }
+  return (
+    url.includes(REFRESH_PATH) ||
+    url.includes(`${AUTH_PREFIX}/login`) ||
+    url.includes(`${AUTH_PREFIX}/forgot-password`) ||
+    url.includes(`${AUTH_PREFIX}/security-grid-preview`) ||
+    url.includes(`${AUTH_PREFIX}/security-grid-reset`)
+  );
 };
 
 const clearStoredSession = () => {
@@ -79,7 +93,7 @@ const refreshAccessToken = async () => {
 
 client.interceptors.request.use(async (config) => {
   config.url = withApiPrefix(config.url);
-  if (!config.url?.includes(REFRESH_PATH)) {
+  if (!shouldSkipRefresh(config.url)) {
     const currentToken = localStorage.getItem("retention-token");
     if (isTokenNearExpiry(currentToken)) {
       await refreshAccessToken();
@@ -100,7 +114,7 @@ client.interceptors.response.use(
       error.response?.status === 401 &&
       originalRequest &&
       !originalRequest._retry &&
-      !originalRequest.url?.includes(REFRESH_PATH)
+      !shouldSkipRefresh(originalRequest.url)
     ) {
       originalRequest._retry = true;
       const token = await refreshAccessToken();
