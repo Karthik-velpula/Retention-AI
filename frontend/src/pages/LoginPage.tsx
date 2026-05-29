@@ -70,6 +70,12 @@ export default function LoginPage() {
     if (axios.isAxiosError(caught)) {
       const detail = caught.response?.data?.detail;
       if (typeof detail === "string" && detail.trim()) return detail;
+      if (caught.response?.status) {
+        return `Login request failed with status ${caught.response.status}.`;
+      }
+      if (caught.config?.baseURL || caught.config?.url) {
+        return `Login request did not reach the backend. URL: ${caught.config.baseURL ?? ""}${caught.config.url ?? ""}`;
+      }
     }
     return fallback;
   };
@@ -78,7 +84,7 @@ export default function LoginPage() {
     event.preventDefault();
     try {
       setError("");
-      const response = await login(username, password);
+      const response = await login(username.trim(), password.trim());
       acceptLogin(response);
     } catch (caught) {
       setError(extractApiError("Incorrect login ID or password.", caught));
