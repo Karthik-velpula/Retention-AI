@@ -9,7 +9,7 @@ from app.api.router import api_router
 from app.core.config import settings
 from app.core.rate_limit import RateLimitMiddleware
 from app.core.security_headers import SecurityHeadersMiddleware
-from app.utils.init_db import init_db
+from app.utils.init_db import init_db, repair_swapped_student_metrics
 
 
 def _api_prefixes() -> list[str]:
@@ -68,6 +68,7 @@ def create_application() -> FastAPI:
 
     @app.on_event("startup")
     async def startup_event() -> None:
+        repair_swapped_student_metrics()
         if settings.APP_ENV.lower() != "production" and settings.RUN_STARTUP_DB_INIT:
             init_db()
 

@@ -15,6 +15,38 @@ from app.db.base import Student, User
 from app.db.session import Base, SessionLocal, engine
 
 
+def repair_swapped_student_metrics() -> int:
+    inspector = inspect(engine)
+    if "students" not in inspector.get_table_names():
+        return 0
+
+    student_columns = {column["name"] for column in inspector.get_columns("students")}
+    if not {"id", "gpa", "attendance"}.issubset(student_columns):
+        return 0
+
+    mysql_repair_sql = """
+        UPDATE students AS s
+        JOIN (
+            SELECT id, gpa AS old_gpa, attendance AS old_attendance
+            FROM students
+            WHERE gpa > 10 AND attendance <= 10
+        ) AS swapped ON swapped.id = s.id
+        SET s.gpa = swapped.old_attendance,
+            s.attendance = swapped.old_gpa
+    """
+    generic_repair_sql = """
+        UPDATE students
+        SET gpa = attendance,
+            attendance = gpa
+        WHERE gpa > 10 AND attendance <= 10
+    """
+
+    with engine.begin() as connection:
+        repair_sql = mysql_repair_sql if connection.dialect.name in {"mysql", "mariadb"} else generic_repair_sql
+        result = connection.execute(text(repair_sql))
+        return int(result.rowcount or 0)
+
+
 def init_db() -> None:
     Base.metadata.create_all(bind=engine)
     inspector = inspect(engine)
