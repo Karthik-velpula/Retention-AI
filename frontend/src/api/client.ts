@@ -12,6 +12,11 @@ const AUTH_PREFIX = "/auth";
 const REFRESH_PATH = "/auth/refresh";
 let refreshPromise: Promise<string | null> | null = null;
 
+const buildUrl = (baseURL: string | undefined, path: string) => {
+  const base = baseURL ?? "";
+  return `${base.replace(/\/$/, "")}/${path.replace(/^\//, "")}`;
+};
+
 const shouldSkipRefresh = (url?: string) => {
   if (!url) {
     return false;
@@ -63,7 +68,7 @@ const refreshAccessToken = async () => {
 
   if (!refreshPromise) {
     refreshPromise = axios
-      .post<LoginResponse>(`${client.defaults.baseURL}${REFRESH_PATH}`, { refresh_token: refreshToken })
+      .post<LoginResponse>(buildUrl(client.defaults.baseURL, REFRESH_PATH), { refresh_token: refreshToken })
       .then(({ data }) => {
         storeSession(data);
         return data.access_token;
