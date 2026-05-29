@@ -3,7 +3,7 @@ from fastapi.responses import StreamingResponse
 from jose import JWTError, jwt
 from sqlalchemy.orm import Session
 
-from app.api.deps import require_admin_or_faculty
+from app.api.deps import require_admin, require_admin_or_faculty
 from app.core.security import ALGORITHM
 from app.core.config import settings
 from app.db.session import get_db
@@ -13,6 +13,7 @@ from app.schemas.student import StudentCreate, StudentOverview, StudentOverviewP
 from app.services import student_service
 from app.services.google_drive_service import upload_pdf_report_to_drive
 from app.services.report_service import generate_parent_student_report
+from app.utils.init_db import repair_swapped_student_metrics
 
 router = APIRouter()
 
@@ -73,6 +74,12 @@ def list_students_page(
         min_cgpa=min_cgpa,
         max_cgpa=max_cgpa,
     )
+
+
+@router.post("/repair-swapped-metrics")
+def repair_swapped_metrics(_: User = Depends(require_admin)):
+    repaired_rows = repair_swapped_student_metrics()
+    return {"detail": "Student metric repair completed.", "repaired_rows": repaired_rows}
 
 
 @router.post("", response_model=StudentResponse)
