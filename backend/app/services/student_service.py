@@ -58,6 +58,14 @@ def _has_low_non_excluded_subject_attendance(student: Student) -> bool:
     )
 
 
+def _normalized_gpa_attendance(student: Student) -> tuple[float, float]:
+    gpa = float(student.gpa or 0)
+    attendance = float(student.attendance or 0)
+    if gpa > 10 and attendance <= 10:
+        return attendance, gpa
+    return gpa, attendance
+
+
 def _low_subject_attendance_exists_expression():
     return exists().where(
         and_(
@@ -83,17 +91,18 @@ def _apply_subject_attendance_guard(
 def _heuristic_overview_risk(student: Student) -> tuple[str, float]:
     academic_financial_points = 0
     lms_points = 0
+    gpa, attendance = _normalized_gpa_attendance(student)
 
-    if student.attendance < 65:
+    if attendance < 65:
         academic_financial_points += 3
-    elif student.attendance < 75:
+    elif attendance < 75:
         academic_financial_points += 2
-    elif student.attendance < 85:
+    elif attendance < 85:
         academic_financial_points += 1
 
-    if student.gpa < 5.5:
+    if gpa < 5.5:
         academic_financial_points += 2
-    elif student.gpa < 7.0:
+    elif gpa < 7.0:
         academic_financial_points += 1
 
     if student.lms_activity:
@@ -110,8 +119,8 @@ def _heuristic_overview_risk(student: Student) -> tuple[str, float]:
     total_points = academic_financial_points + lms_points
 
     if (
-        student.attendance >= 80
-        and student.gpa >= 8.0
+        attendance >= 80
+        and gpa >= 8.0
         and student.lms_activity
         and student.lms_activity.assignment_submission_rate >= 80
         and student.financial
@@ -225,6 +234,7 @@ def _safe_condition_without_subject_guard_expression():
 
 def _student_overview(student: Student) -> dict[str, object]:
     fallback_risk_level, fallback_risk_score = _heuristic_overview_risk(student)
+    gpa, attendance = _normalized_gpa_attendance(student)
     return {
         "id": student.id,
         "registration_number": student.registration_number,
@@ -241,8 +251,8 @@ def _student_overview(student: Student) -> dict[str, object]:
         "section": student.section,
         "gender": student.gender,
         "age": student.age,
-        "gpa": student.gpa,
-        "attendance": student.attendance,
+        "gpa": gpa,
+        "attendance": attendance,
         "lms_activity_percentage": float(student.lms_activity.assignment_submission_rate) if student.lms_activity else 0.0,
         "fees_paid_status": derive_fees_paid_status(
             student.financial.fee_due if student.financial else 0,
@@ -259,6 +269,43 @@ def _student_overview(student: Student) -> dict[str, object]:
         "year": student.year,
         "latest_risk_level": fallback_risk_level,
         "latest_risk_score": fallback_risk_score,
+    }
+
+
+def student_detail_response(student: Student) -> dict[str, object]:
+    gpa, attendance = _normalized_gpa_attendance(student)
+    return {
+        "id": student.id,
+        "registration_number": student.registration_number,
+        "name": student.name,
+        "email": student.email,
+        "student_mobile": student.student_mobile or "",
+        "parent_mobile": student.parent_mobile or "",
+        "counselor_name": student.counselor_name or "",
+        "codechef_username": student.codechef_username or "-",
+        "codechef_contests_participated": student.codechef_contests_participated or 0,
+        "codechef_problems_solved": student.codechef_problems_solved or 0,
+        "codechef_participation_status": student.codechef_participation_status or "Not Available",
+        "codechef_last_synced_at": student.codechef_last_synced_at,
+        "section": student.section or "-",
+        "gender": student.gender or "-",
+        "age": student.age,
+        "gpa": gpa,
+        "attendance": attendance,
+        "marks": student.marks,
+        "pre_t1_marks": student.pre_t1_marks,
+        "t1_marks": student.t1_marks,
+        "t2_marks": student.t2_marks,
+        "t3_marks": student.t3_marks,
+        "t4_marks": student.t4_marks,
+        "t5_marks": student.t5_marks,
+        "department": student.department,
+        "year": student.year,
+        "career_interest": student.career_interest,
+        "skills": student.skills or "",
+        "lms_activity": student.lms_activity,
+        "financial": student.financial,
+        "subject_attendance": student.subject_attendance or [],
     }
 
 
