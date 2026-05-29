@@ -34,6 +34,7 @@ def create_application() -> FastAPI:
         "http://127.0.0.1:5174",
         "http://127.0.0.1:5175",
         "http://127.0.0.1:5176",
+        "https://retention-ai-puce.vercel.app",
     ]
     for origin in settings.CORS_ORIGINS_LIST:
         if origin not in allowed_origins:
