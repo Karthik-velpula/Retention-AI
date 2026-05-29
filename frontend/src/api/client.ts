@@ -9,6 +9,7 @@ const isVercelHost = () =>
 
 const client = axios.create({
   baseURL: isVercelHost() ? API_URL : import.meta.env.VITE_API_BASE_URL ?? API_URL,
+  timeout: 15000,
 });
 
 const AUTH_PREFIX = "/auth";
@@ -71,7 +72,7 @@ const refreshAccessToken = async () => {
 
   if (!refreshPromise) {
     refreshPromise = axios
-      .post<LoginResponse>(buildUrl(client.defaults.baseURL, REFRESH_PATH), { refresh_token: refreshToken })
+      .post<LoginResponse>(buildUrl(client.defaults.baseURL, REFRESH_PATH), { refresh_token: refreshToken }, { timeout: 15000 })
       .then(({ data }) => {
         storeSession(data);
         return data.access_token;

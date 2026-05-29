@@ -22,6 +22,7 @@ export default function LoginPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [isSigningIn, setIsSigningIn] = useState(false);
   const [showRecoveryHelp, setShowRecoveryHelp] = useState(false);
   const [recoveryUsername, setRecoveryUsername] = useState("");
   const [recoveryOtp, setRecoveryOtp] = useState("");
@@ -73,6 +74,9 @@ export default function LoginPage() {
       if (caught.response?.status) {
         return `Login request failed with status ${caught.response.status}.`;
       }
+      if (caught.code === "ECONNABORTED") {
+        return "Login request timed out. Please check the backend server and try again.";
+      }
       if (caught.config?.baseURL || caught.config?.url) {
         return `Login request did not reach the backend. URL: ${caught.config.baseURL ?? ""}${caught.config.url ?? ""}`;
       }
@@ -82,12 +86,21 @@ export default function LoginPage() {
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
+    const cleanUsername = username.trim();
+    const cleanPassword = password.trim();
+    if (!cleanUsername || !cleanPassword) {
+      setError("Please enter both login ID and password.");
+      return;
+    }
     try {
       setError("");
-      const response = await login(username.trim(), password.trim());
+      setIsSigningIn(true);
+      const response = await login(cleanUsername, cleanPassword);
       acceptLogin(response);
     } catch (caught) {
       setError(extractApiError("Incorrect login ID or password.", caught));
+    } finally {
+      setIsSigningIn(false);
     }
   };
 
@@ -327,9 +340,10 @@ export default function LoginPage() {
 
             <button
               type="submit"
-              className="inline-flex w-full items-center justify-center gap-3 rounded-[0.95rem] bg-[#31489d] px-4 py-3.5 text-sm font-black uppercase tracking-[0.2em] text-white shadow-[0_15px_28px_rgba(49,72,157,0.26)] transition hover:bg-[#273d8c]"
+              disabled={isSigningIn}
+              className="inline-flex w-full items-center justify-center gap-3 rounded-[0.95rem] bg-[#31489d] px-4 py-3.5 text-sm font-black uppercase tracking-[0.2em] text-white shadow-[0_15px_28px_rgba(49,72,157,0.26)] transition hover:bg-[#273d8c] disabled:cursor-not-allowed disabled:bg-slate-400 disabled:shadow-none"
             >
-              Sign In To Workspace
+              {isSigningIn ? "Signing In..." : "Sign In To Workspace"}
               <ArrowRight size={18} />
             </button>
 

@@ -29,9 +29,9 @@ class Settings(BaseSettings):
     SMTP_START_TLS: bool = True
     SMTP_VALIDATE_CERTS: bool = True
     SMTP_TIMEOUT_SECONDS: int = 20
-    CLIENT_URL: str = "https://160.187.69.41"
-    PUBLIC_API_URL: str = "https://160.187.69.41/aistudent/ren"
-    ALLOWED_HOSTS: str = "160.187.69.41,localhost,127.0.0.1"
+    CLIENT_URL: str = "https://160.187.169.41"
+    PUBLIC_API_URL: str = "https://160.187.169.41/aistudent/ren"
+    ALLOWED_HOSTS: str = "160.187.169.41,localhost,127.0.0.1"
     CORS_ORIGINS: str = ""
     FORCE_HTTPS: bool = False
     RUN_STARTUP_DB_INIT: bool = True
