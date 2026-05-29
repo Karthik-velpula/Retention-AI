@@ -4,8 +4,11 @@ import { jwtDecode } from "jwt-decode";
 import { API_URL } from "../config";
 import type { LoginResponse } from "../types";
 
+const isVercelHost = () =>
+  typeof window !== "undefined" && window.location.hostname.endsWith(".vercel.app");
+
 const client = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL ?? API_URL,
+  baseURL: isVercelHost() ? API_URL : import.meta.env.VITE_API_BASE_URL ?? API_URL,
 });
 
 const AUTH_PREFIX = "/auth";
