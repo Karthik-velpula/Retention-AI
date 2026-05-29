@@ -5,14 +5,14 @@ services:
     rootDir: backend
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
-    healthCheckPath: /aistudent/ren/health
+    healthCheckPath: /ren/health
     envVars:
       - key: APP_ENV
         value: production
       - key: PYTHON_VERSION
         value: 3.11.9
       - key: APP_BASE_PATH
-        value: /aistudent
+        value: ""
       - key: API_V1_STR
         value: /ren
       - key: ACCESS_TOKEN_EXPIRE_MINUTES
