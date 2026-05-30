@@ -7,8 +7,11 @@ import type { LoginResponse } from "../types";
 const isVercelHost = () =>
   typeof window !== "undefined" && window.location.hostname.endsWith(".vercel.app");
 
+const isLocalHost = () =>
+  typeof window !== "undefined" && ["localhost", "127.0.0.1"].includes(window.location.hostname);
+
 const client = axios.create({
-  baseURL: isVercelHost() ? API_URL : import.meta.env.VITE_API_BASE_URL ?? API_URL,
+  baseURL: isVercelHost() || isLocalHost() ? API_URL : import.meta.env.VITE_API_BASE_URL ?? API_URL,
   timeout: 15000,
 });
 
