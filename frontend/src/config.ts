@@ -4,7 +4,7 @@ const SERVER_APP_BASENAME = new URL(BASE_URL).pathname.replace(/\/$/, "") || "/"
 const VERCEL_APP_BASENAME = "/Retention-AI";
 const LOCAL_API_URL = "http://127.0.0.1:8000/ren";
 const SERVER_API_URL = "/aistudent/ren/ren";
-const PUBLIC_BACKEND_API_URL = "https://160.187.169.41/aistudent/ren/ren";
+const PUBLIC_BACKEND_API_URL = "https://retention-ai-backend-z21q.onrender.com/aistudent/ren";
 
 const isVercelHost = () =>
   typeof window !== "undefined" && window.location.hostname.endsWith(".vercel.app");
