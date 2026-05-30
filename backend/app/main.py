@@ -11,6 +11,8 @@ from app.core.rate_limit import RateLimitMiddleware
 from app.core.security_headers import SecurityHeadersMiddleware
 from app.utils.init_db import init_db, repair_swapped_student_metrics
 
+APP_BUILD_VERSION = "8090059"
+
 
 def _api_prefixes() -> list[str]:
     prefixes = [settings.API_PREFIX]
@@ -76,9 +78,14 @@ def create_application() -> FastAPI:
     async def health_check() -> dict[str, str]:
         return {"status": "ok"}
 
+    @app.get(f"{settings.API_PREFIX}/version", tags=["health"])
+    async def version_check() -> dict[str, str]:
+        return {"version": APP_BUILD_VERSION}
+
     for prefix in _api_prefixes():
         if prefix != settings.API_PREFIX:
             app.add_api_route(f"{prefix}/health", health_check, methods=["GET"], tags=["health"], include_in_schema=False)
+            app.add_api_route(f"{prefix}/version", version_check, methods=["GET"], tags=["health"], include_in_schema=False)
         app.include_router(api_router, prefix=prefix, include_in_schema=prefix == settings.API_PREFIX)
     return app
 
